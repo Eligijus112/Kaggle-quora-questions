@@ -12,6 +12,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
 
 from preprocess import clean
 
@@ -42,7 +43,9 @@ X_train = preproc_pipeline(X_train)
 
 ### Creating a document term matrix
 
-vect = CountVectorizer(min_df = 0.0001, binary = True)
+vect = CountVectorizer(min_df = 0.0001, 
+                       binary = True, 
+                       ngram_range = (1, 2))
 dtm_train = vect.fit_transform(X_train)
 
 ## Creating a model
@@ -60,5 +63,19 @@ coef_df = coef_df.sort_values('coefficient')
 
 ## Forecasting on test data 
 
+### Creating the test document term matrix
 
+vect = CountVectorizer(vocabulary = ft_names, 
+                       binary = True, 
+                       ngram_range = (1, 2))
+dtm_test = vect.fit_transform(X_test)
 
+### Prediction
+
+y_hat = fitted_model.predict(dtm_test)
+
+### Calculating accuracy
+
+y_actual = Y_test.tolist()
+y_hat = y_hat.tolist()
+print(f1_score(y_actual, y_hat))
